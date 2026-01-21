@@ -1,0 +1,741 @@
+Based on the PDF requirements, I'll create a comprehensive, production-grade prompt for implementing this Multi-Agentic Coding Framework using AutoGen [file:1]. This prompt is structured for use with GitHub Copilot or similar professional LLMs.
+
+---
+
+## **Comprehensive Implementation Prompt: Multi-Agentic Coding Framework with AutoGen**
+
+### **PROJECT OVERVIEW**
+Build an enterprise-grade Multi-Agentic Coding Framework using Microsoft AutoGen that orchestrates 7 specialized agents to transform natural language requirements into fully documented, tested, and deployable Python code [file:1]. The system must include iterative feedback loops, error handling, and a Streamlit UI for user interaction.
+
+---
+
+### **CORE REQUIREMENTS & ARCHITECTURE**
+
+**Technology Stack:**
+- Python 3.10+
+- Microsoft AutoGen (pyautogen) for multi-agent orchestration
+- OpenAI API with model='gpt-4o'
+- Streamlit for UI
+- pytest for testing framework
+- Docker for deployment configuration
+- GitHub for version control
+
+**Agent Pipeline Architecture:**
+```
+User Input → Requirement Analysis Agent → Coding Agent ⇄ Code Review Agent (iterative loop)
+                                              ↓
+                        Documentation Agent ← Approved Code
+                                              ↓
+                        Test Case Generation Agent
+                                              ↓
+                        Deployment Configuration Agent
+                                              ↓
+                        Streamlit UI Agent
+```
+
+---
+
+### **AGENT-BY-AGENT IMPLEMENTATION INSTRUCTIONS**
+
+#### **AGENT 1: Requirement Analysis Agent**
+
+**Purpose:** Transform natural language input into structured, unambiguous software requirements [file:1].
+
+**Chain of Thought Instructions:**
+1. Parse the natural language input for key entities (functions, data structures, business logic)
+2. Identify functional requirements (what the system should do)
+3. Identify non-functional requirements (performance, security, scalability)
+4. Structure requirements into:
+   - **User Stories:** "As a [user], I want [goal] so that [benefit]"
+   - **Acceptance Criteria:** Specific, testable conditions
+   - **Technical Constraints:** Language version, dependencies, limitations
+   - **Input/Output Specifications:** Expected data formats
+5. Output as structured JSON or Markdown format
+
+**Implementation Details:**
+```python
+# Create a ConversableAgent with system message
+requirement_agent = autogen.AssistantAgent(
+    name="RequirementAnalyst",
+    system_message="""You are a senior Business Analyst specializing in software requirements.
+    Your task is to convert natural language descriptions into structured requirements.
+
+    Output Format:
+    ## Project Title
+
+    ### Functional Requirements
+    - [List each requirement]
+
+    ### Technical Specifications
+    - Programming Language: Python 3.10+
+    - Dependencies: [List libraries]
+    - Input Format: [Specify]
+    - Output Format: [Specify]
+
+    ### Acceptance Criteria
+    - [Testable conditions]
+
+    ### Constraints & Assumptions
+    - [List constraints]
+    """,
+    llm_config={"config_list": config_list, "temperature": 0.3}
+)
+```
+
+---
+
+#### **AGENT 2: Coding Agent**
+
+**Purpose:** Generate production-quality Python code from structured requirements [file:1].
+
+**Chain of Thought Instructions:**
+1. Analyze the structured requirements from the Requirement Analysis Agent
+2. Design the module structure (classes, functions, data models)
+3. Implement core business logic with proper:
+   - Type hints (Python 3.10+ style)
+   - Error handling (try-except blocks)
+   - Input validation
+   - Logging statements
+4. Follow PEP 8 style guidelines
+5. Add inline comments for complex logic
+6. Ensure code is modular and reusable
+7. Include a `main()` function for execution
+
+**Implementation Details:**
+```python
+coding_agent = autogen.AssistantAgent(
+    name="SeniorDeveloper",
+    system_message="""You are an expert Python developer with 10+ years of experience.
+    Generate production-ready Python code based on structured requirements.
+
+    Code Standards:
+    - Use type hints for all functions
+    - Implement comprehensive error handling
+    - Follow PEP 8 style guide
+    - Add docstrings (Google style) for all classes/functions
+    - Use logging instead of print statements
+    - Implement input validation
+    - Make code modular with single responsibility principle
+    - Include if __name__ == "__main__" block
+
+    Output ONLY the Python code with comments explaining complex sections.
+    """,
+    llm_config={"config_list": config_list, "temperature": 0.2}
+)
+```
+
+---
+
+#### **AGENT 3: Code Review Agent**
+
+**Purpose:** Review generated code for correctness, efficiency, security, and best practices with iterative feedback [file:1].
+
+**Chain of Thought Instructions:**
+1. Perform static analysis on the code:
+   - **Correctness:** Does it meet requirements? Any logic errors?
+   - **Security:** Check for SQL injection, path traversal, hardcoded secrets
+   - **Efficiency:** Identify O(n²) operations, redundant loops, memory leaks
+   - **Best Practices:** Proper exception handling, resource cleanup, SOLID principles
+2. Check for common vulnerabilities (OWASP Top 10)
+3. Verify error handling coverage
+4. Assess code readability and maintainability
+5. Provide specific, actionable feedback with line references
+6. Assign a status: **APPROVED** or **NEEDS_REVISION**
+7. If revision needed, specify exact changes required
+
+**Implementation Details:**
+```python
+code_review_agent = autogen.AssistantAgent(
+    name="CodeReviewer",
+    system_message="""You are a Principal Software Engineer conducting code reviews.
+    Review code against these criteria:
+
+    1. CORRECTNESS: Verify logic matches requirements
+    2. SECURITY: Check for vulnerabilities (injection, XSS, hardcoded secrets)
+    3. PERFORMANCE: Identify inefficient algorithms or memory issues
+    4. ERROR HANDLING: Ensure all exceptions are caught appropriately
+    5. READABILITY: Code should be self-documenting
+    6. TESTING: Code should be testable (no tight coupling)
+
+    Output Format:
+    ## Review Status: [APPROVED / NEEDS_REVISION]
+
+    ### Issues Found
+    - [Severity: HIGH/MEDIUM/LOW] Line X: [Description]
+
+    ### Recommendations
+    - [Specific improvement with code example]
+
+    ### Security Concerns
+    - [List any security vulnerabilities]
+
+    If status is NEEDS_REVISION, the code will be sent back to the Coding Agent.
+    """,
+    llm_config={"config_list": config_list, "temperature": 0.4}
+)
+```
+
+**Iterative Loop Logic:**
+```python
+# Implement feedback loop
+max_iterations = 3
+iteration_count = 0
+code_approved = False
+
+while not code_approved and iteration_count < max_iterations:
+    # Coding Agent generates code
+    # Code Review Agent reviews code
+    # Extract review status
+    if "APPROVED" in review_result:
+        code_approved = True
+    else:
+        # Send feedback back to Coding Agent
+        iteration_count += 1
+```
+
+---
+
+#### **AGENT 4: Documentation Agent**
+
+**Purpose:** Generate comprehensive, structured documentation for the approved code [file:1].
+
+**Chain of Thought Instructions:**
+1. Analyze the approved code structure
+2. Generate documentation in Markdown format with:
+   - **Overview:** What the code does
+   - **Architecture:** Module structure diagram (text-based)
+   - **Installation:** Setup instructions
+   - **API Reference:** All classes, functions with parameters and return types
+   - **Usage Examples:** Code snippets showing how to use each function
+   - **Configuration:** Environment(already local create env as 'genaivnv') variables, config files
+   - **Error Handling:** Common errors and solutions
+3. Use clear, concise language
+4. Include code examples for each public function
+5. Add diagrams (ASCII or Mermaid syntax) for complex flows
+
+**Implementation Details:**
+```python
+documentation_agent = autogen.AssistantAgent(
+    name="TechnicalWriter",
+    system_message="""You are a technical documentation specialist.
+    Generate comprehensive documentation for Python code.
+
+    Documentation Structure:
+
+    # [Project Name]
+
+    ## Overview
+    Brief description of functionality
+
+    ## Installation
+    ```bash
+    pip install -r requirements.txt
+    ```
+
+    ## Architecture
+    [Text-based component diagram]
+
+    ## API Reference
+    ### Class: ClassName
+    **Purpose:** [Description]
+
+    #### Method: method_name
+    **Parameters:**
+    - param1 (type): Description
+
+    **Returns:** type - Description
+
+    **Example:**
+    ```python
+    [Usage example]
+    ```
+
+    ## Configuration
+    [Environment(already local create env as 'genaivnv') variables and settings]
+
+    ## Error Handling
+    [Common errors and solutions]
+
+    ## Contributing
+    [Guidelines for contributions]
+    """,
+    llm_config={"config_list": config_list, "temperature": 0.3}
+)
+```
+
+---
+
+#### **AGENT 5: Test Case Generation Agent**
+
+**Purpose:** Create comprehensive unit and integration tests for all code modules [file:1].
+
+**Chain of Thought Instructions:**
+1. Analyze the code structure to identify:
+   - All public functions/methods
+   - Edge cases (empty inputs, None values, boundary conditions)
+   - Error scenarios (invalid inputs, exceptions)
+2. Generate pytest test cases with:
+   - **Happy path tests:** Normal expected behavior
+   - **Edge case tests:** Boundary values, empty data
+   - **Error handling tests:** Invalid inputs, exceptions
+   - **Integration tests:** Multi-function workflows
+3. Use pytest fixtures for setup/teardown
+4. Mock external dependencies (APIs, databases)
+5. Aim for >80% code coverage
+6. Include assertions for all expected outcomes
+
+**Implementation Details:**
+```python
+test_generation_agent = autogen.AssistantAgent(
+    name="QAEngineer",
+    system_message="""You are a Quality Assurance engineer specializing in test automation.
+    Generate comprehensive pytest test cases for Python code.
+
+    Test Structure:
+    ```python
+    import pytest
+    from unittest.mock import Mock, patch
+
+    # Fixtures
+    @pytest.fixture
+    def sample_data():
+        return {...}
+
+    # Happy path tests
+    def test_function_name_success(sample_data):
+        result = function_name(sample_data)
+        assert result == expected_value
+
+    # Edge case tests
+    def test_function_name_empty_input():
+        with pytest.raises(ValueError):
+            function_name(None)
+
+    # Integration tests
+    def test_integration_workflow():
+        # Test multiple functions together
+        pass
+    ```
+
+    Requirements:
+    - At least 1 test per function
+    - Cover happy path, edge cases, and error scenarios
+    - Use descriptive test names
+    - Include docstrings for complex tests
+    - Mock external dependencies
+    """,
+    llm_config={"config_list": config_list, "temperature": 0.3}
+)
+```
+
+---
+
+#### **AGENT 6: Deployment Configuration Agent**
+
+**Purpose:** Generate deployment scripts and configuration for running the project [file:1].
+
+**Chain of Thought Instructions:**
+1. Analyze the code dependencies and runtime requirements
+2. Generate the following artifacts:
+   - **requirements.txt:** All Python dependencies with versions
+   - **Dockerfile:** Multi-stage build for production deployment
+   - **docker-compose.yml:** Service orchestration (if needed)
+   - **deploy.sh:** Bash script for automated deployment
+   - **.env.example:** Template for Environment(already local create env as 'genaivnv') variables
+   - **config.yaml:** Application configuration
+3. Include health checks and logging configuration
+4. Add comments explaining each deployment step
+5. Ensure security best practices (non-root user, minimal base image)
+
+**Implementation Details:**
+```python
+deployment_agent = autogen.AssistantAgent(
+    name="DevOpsEngineer",
+    system_message="""You are a DevOps engineer specializing in containerization and deployment.
+    Generate production-ready deployment configurations.
+
+    Generate the following files:
+
+    1. requirements.txt
+    [List all dependencies with versions]
+
+    2. Dockerfile
+    ```dockerfile
+    FROM python:3.10-slim
+    WORKDIR /app
+    COPY requirements.txt .
+    RUN pip install --no-cache-dir -r requirements.txt
+    COPY . .
+    CMD ["python", "main.py"]
+    ```
+
+    3. deploy.sh
+    ```bash
+    #!/bin/bash
+    # Build and deploy script
+    ```
+
+    4. .env.example
+    ```
+    API_KEY=your_api_key_here
+    ```
+
+    5. docker-compose.yml (if multi-service)
+
+    Include:
+    - Health checks
+    - Logging configuration
+    - Security best practices
+    - Port mappings
+    - Volume mounts for persistence
+    """,
+    llm_config={"config_list": config_list, "temperature": 0.2}
+)
+```
+
+---
+
+#### **AGENT 7: Streamlit UI Agent**
+
+**Purpose:** Create an interactive Streamlit UI for the multi-agent system [file:1].
+
+**Chain of Thought Instructions:**
+1. Design a clean, intuitive UI layout with:
+   - **Input Section:** Text area for natural language requirements
+   - **Agent Pipeline Status:** Progress indicators for each agent
+   - **Output Sections:** Tabs for Requirements, Code, Review, Documentation, Tests, Deployment
+   - **Logs Panel:** Real-time agent conversation logs
+2. Implement session state management for conversation history
+3. Add error handling with user-friendly messages
+4. Include a "Start Processing" button to trigger the agent workflow
+5. Display outputs with syntax highlighting (using `st.code()`)
+6. Add download buttons for generated artifacts
+7. Include a sidebar with configuration options (model selection, temperature)
+
+**Implementation Details:**
+```python
+streamlit_ui_agent = autogen.AssistantAgent(
+    name="UIDesigner",
+    system_message="""You are a UI/UX engineer specializing in Streamlit applications.
+    Create a user-friendly Streamlit interface for the multi-agent system.
+
+    UI Structure:
+
+    ```python
+    import streamlit as st
+
+    st.set_page_config(page_title="AutoGen Multi-Agent Code Generator", layout="wide")
+
+    st.title("🤖 Multi-Agentic Coding Framework")
+
+    # Sidebar configuration
+    with st.sidebar:
+        st.header("Configuration")
+        model = st.selectbox("Select Model", ["GPT-4o", "GPT-4", "GPT-4-turbo"])
+        temperature = st.slider("Temperature", 0.0, 1.0, 0.3)
+
+    # Input section
+    requirement_input = st.text_area("Enter Requirements", height=200)
+
+    if st.button("🚀 Start Processing"):
+        # Agent pipeline execution with progress tracking
+        progress_bar = st.progress(0)
+        status = st.empty()
+
+        # Execute each agent with status updates
+
+        # Output tabs
+        tab1, tab2, tab3, tab4, tab5, tab6 = st.tabs([
+            "📋 Requirements", "💻 Code", "🔍 Review", 
+            "📖 Documentation", "🧪 Tests", "🚀 Deployment"
+        ])
+
+        with tab1:
+            st.code(requirements, language="markdown")
+            st.download_button("Download", requirements, "requirements.md")
+    ```
+
+    Features:
+    - Real-time progress updates
+    - Syntax highlighting
+    - Download buttons for all artifacts
+    - Error handling with st.error()
+    - Session state for conversation history
+    """,
+    llm_config={"config_list": config_list, "temperature": 0.3}
+)
+```
+
+---
+
+### **WORKFLOW ORCHESTRATION**
+
+**Group Chat Configuration:**
+```python
+# Create GroupChat for agent coordination
+groupchat = autogen.GroupChat(
+    agents=[
+        requirement_agent,
+        coding_agent,
+        code_review_agent,
+        documentation_agent,
+        test_generation_agent,
+        deployment_agent,
+        streamlit_ui_agent
+    ],
+    messages=[],
+    max_round=20,
+    speaker_selection_method="round_robin"  # or "auto" for LLM-based selection
+)
+
+manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=llm_config)
+```
+
+**Sequential Pipeline with Feedback Loop:**
+```python
+def execute_pipeline(user_requirement: str) -> dict:
+    """Execute the multi-agent pipeline with feedback loops."""
+
+    results = {}
+
+    # Step 1: Requirement Analysis
+    results['requirements'] = requirement_agent.generate_reply(
+        messages=[{"role": "user", "content": user_requirement}]
+    )
+
+    # Step 2-3: Coding with Review Loop
+    max_iterations = 3
+    for iteration in range(max_iterations):
+        code = coding_agent.generate_reply(
+            messages=[{"role": "user", "content": results['requirements']}]
+        )
+
+        review = code_review_agent.generate_reply(
+            messages=[{"role": "user", "content": code}]
+        )
+
+        if "APPROVED" in review:
+            results['code'] = code
+            results['review'] = review
+            break
+        elif iteration < max_iterations - 1:
+            # Provide feedback to coding agent
+            feedback_message = f"Code needs revision:
+{review}"
+            # Continue loop
+
+    # Step 4: Documentation
+    results['documentation'] = documentation_agent.generate_reply(
+        messages=[{"role": "user", "content": results['code']}]
+    )
+
+    # Step 5: Test Generation
+    results['tests'] = test_generation_agent.generate_reply(
+        messages=[{"role": "user", "content": results['code']}]
+    )
+
+    # Step 6: Deployment Configuration
+    results['deployment'] = deployment_agent.generate_reply(
+        messages=[{"role": "user", "content": results['code']}]
+    )
+
+    # Step 7: UI Generation
+    results['ui'] = streamlit_ui_agent.generate_reply(
+        messages=[{"role": "user", "content": str(results)}]
+    )
+
+    return results
+```
+
+---
+
+### **PROJECT STRUCTURE**
+
+Generate the following directory structure:
+```
+multi-agent-framework/
+├── src/
+│   ├── agents/
+│   │   ├── __init__.py
+│   │   ├── requirement_agent.py
+│   │   ├── coding_agent.py
+│   │   ├── review_agent.py
+│   │   ├── documentation_agent.py
+│   │   ├── test_agent.py
+│   │   ├── deployment_agent.py
+│   │   └── ui_agent.py
+│   ├── orchestrator/
+│   │   ├── __init__.py
+│   │   └── pipeline.py
+│   └── utils/
+│       ├── __init__.py
+│       ├── config.py
+│       └── logger.py
+├── tests/
+│   └── test_pipeline.py
+├── output/
+│   ├── generated_code/
+│   ├── documentation/
+│   └── tests/
+├── ui/
+│   └── streamlit_app.py
+├── config/
+│   ├── config.yaml
+│   └── .env.example
+├── Dockerfile
+├── docker-compose.yml
+├── requirements.txt
+├── README.md
+└── setup.py
+```
+
+---
+
+### **ERROR HANDLING & EDGE CASES**
+
+**Implement robust error handling:**
+1. **API Rate Limits:** Implement exponential backoff and retry logic
+2. **Invalid Requirements:** Validate input before processing
+3. **Code Generation Failures:** Catch exceptions and provide fallback responses
+4. **Timeout Handling:** Set max execution time for each agent
+5. **Resource Constraints:** Monitor memory and CPU usage
+6. **Network Failures:** Handle API connection errors gracefully
+
+```python
+import logging
+from tenacity import retry, stop_after_attempt, wait_exponential
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+@retry(stop=stop_after_attempt(3), wait=wait_exponential(multiplier=1, min=4, max=10))
+def call_agent_with_retry(agent, message):
+    """Call agent with retry logic."""
+    try:
+        return agent.generate_reply(messages=[{"role": "user", "content": message}])
+    except Exception as e:
+        logger.error(f"Agent call failed: {e}")
+        raise
+```
+
+---
+
+### **TESTING & VALIDATION**
+
+**Test the entire pipeline with sample inputs:**
+```python
+# Test Case 1: Simple function
+sample_input_1 = "Create a Python function that calculates the factorial of a number"
+
+# Test Case 2: Complex application
+sample_input_2 = """
+Create a REST API using FastAPI that:
+- Manages a todo list with CRUD operations
+- Stores data in SQLite database
+- Includes authentication using JWT tokens
+- Has input validation using Pydantic models
+"""
+
+# Test Case 3: Data processing
+sample_input_3 = "Build a CSV data processor that reads a file, removes duplicates, and exports to JSON"
+```
+
+---
+
+### **DELIVERABLES CHECKLIST**
+
+Ensure the following artifacts are generated:
+- [x] Complete Python codebase with all 7 agents
+- [x] Orchestration pipeline with feedback loops
+- [x] Streamlit UI implementation
+- [x] README.md with setup instructions
+- [x] requirements.txt with all dependencies
+- [x] Dockerfile and deployment scripts
+- [x] Documentation in Markdown format
+- [x] Unit tests with pytest
+- [x] Example outputs for 3 test cases
+- [x] .gitignore file
+- [x] GitHub Actions CI/CD pipeline (optional)
+
+---
+
+### **EXECUTION COMMAND FOR COPILOT**
+
+**Prompt to use in VS Code with GitHub Copilot:**
+
+```
+Implement the Multi-Agentic Coding Framework following these steps:
+
+STEP 1: Setup project structure
+- Create the directory structure as specified
+- Initialize Python virtual Environment(already local create env as 'genaivnv')
+- Create requirements.txt with: pyautogen, streamlit, OpenAI API with model='gpt-4o', pytest, pydantic, tenacity
+
+STEP 2: Implement Configuration Management
+- Create src/utils/config.py to load API keys from .env
+- Create src/utils/logger.py for centralized logging
+- Create config/config.yaml for agent configurations
+
+STEP 3: Implement Each Agent (in order)
+- src/agents/requirement_agent.py - Requirement Analysis Agent
+- src/agents/coding_agent.py - Coding Agent
+- src/agents/review_agent.py - Code Review Agent with feedback loop
+- src/agents/documentation_agent.py - Documentation Agent
+- src/agents/test_agent.py - Test Case Generation Agent
+- src/agents/deployment_agent.py - Deployment Configuration Agent
+- src/agents/ui_agent.py - Streamlit UI Agent
+
+Each agent should:
+- Use autogen.AssistantAgent with appropriate system message
+- Have retry logic with tenacity
+- Include error handling
+- Log all operations
+- Save outputs to output/ directory
+
+STEP 4: Implement Pipeline Orchestration
+- Create src/orchestrator/pipeline.py
+- Implement execute_pipeline() function with sequential agent execution
+- Add feedback loop between Coding and Review agents (max 3 iterations)
+- Save all intermediate outputs
+
+STEP 5: Create Streamlit UI
+- Create ui/streamlit_app.py
+- Add input section for requirements
+- Add progress tracking for each agent
+- Create tabs for each agent's output
+- Add download buttons for artifacts
+- Include error handling with st.error()
+
+STEP 6: Add Tests
+- Create tests/test_pipeline.py
+- Test each agent individually
+- Test the complete pipeline with 3 sample inputs
+- Test error handling scenarios
+
+STEP 7: Create Documentation
+- Write comprehensive README.md with:
+  * Project overview
+  * Installation instructions
+  * Usage examples
+  * Architecture diagram (ASCII)
+  * API reference
+  * Troubleshooting guide
+
+STEP 8: Add Deployment Files
+- Create Dockerfile (multi-stage build)
+- Create docker-compose.yml
+- Create deploy.sh script
+- Create .env.example
+
+Follow best practices:
+- Type hints everywhere
+- PEP 8 compliance
+- Comprehensive error handling
+- Logging instead of print
+- Docstrings for all functions
+- Clean, modular code
+```
+
+---
+
+This comprehensive prompt provides step-by-step guidance for implementing the entire Multi-Agentic Coding Framework with professional-grade quality, proper error handling, and complete documentation [file:1].

@@ -1,0 +1,63 @@
+# Multi-Agent Framework Configuration
+
+# API Configuration
+api:
+  provider: "openai"
+  model_id: "gpt-4o"  # Changed from gpt-5.2 (which requires custom server)
+  api_key_env: "OPENAI_API_KEY"
+  # base_url: "http://localhost:5000/v1"  # Commented out - using official OpenAI API
+
+agents:
+  requirement_analyst:
+    name: "RequirementAnalyst"
+    temperature: 0.3
+    max_completion_tokens: 2000
+    description: "Senior Business Analyst specializing in software requirements"
+
+  senior_developer:
+    name: "SeniorDeveloper"
+    temperature: 0.2
+    max_completion_tokens: 3000
+    description: "Expert Python developer with 10+ years of experience"
+
+  code_reviewer:
+    name: "CodeReviewer"
+    temperature: 0.4
+    max_completion_tokens: 2500
+    description: "Principal Software Engineer conducting code reviews"
+
+  technical_writer:
+    name: "TechnicalWriter"
+    temperature: 0.3
+    max_completion_tokens: 2500
+    description: "Technical documentation specialist"
+
+  qa_engineer:
+    name: "QAEngineer"
+    temperature: 0.3
+    max_completion_tokens: 2500
+    description: "Quality Assurance engineer specializing in test automation"
+
+  devops_engineer:
+    name: "DevOpsEngineer"
+    temperature: 0.2
+    max_completion_tokens: 2000
+    description: "DevOps engineer specializing in containerization and deployment"
+
+  ui_designer:
+    name: "UIDesigner"
+    temperature: 0.3
+    max_completion_tokens: 2500
+    description: "UI/UX engineer specializing in Streamlit applications"
+
+pipeline:
+  max_iterations: 3
+  timeout_seconds: 300
+  retry_attempts: 3
+  retry_delay: 4
+  max_rounds: 10  # Max conversation rounds in AutoGen GroupChat
+
+output:
+  save_intermediate_results: true
+  create_timestamps: true
+  format: "markdown"

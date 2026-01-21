@@ -1,0 +1,9 @@
+pyautogen==0.2.35
+openai>=1.58.1
+streamlit==1.39.0
+pydantic==2.12.5
+pytest==8.3.4
+python-dotenv==1.0.1
+pyyaml==6.0.2
+tenacity==9.0.0
+docker
